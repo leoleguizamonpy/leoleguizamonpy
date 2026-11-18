@@ -1,4 +1,4 @@
-"""Piezas gráficas del perfil de GitHub de Leo Leguizamón: banner con la marca personal (símbolo de bloques en ámbar).
+"""Piezas gráficas del perfil de GitHub de Leo Leguizamón, con diseño editorial: portada, qué hago y cómo trabajo,\ncon la marca personal (símbolo de bloques en ámbar).
 Textos convertidos a trazos con Inter Tight (HarfBuzz) para que GitHub los muestre igual en todos lados.
 Uso: pip install fonttools brotli uharfbuzz && python scripts/generate_profile_art.py"""
 import io, sys
@@ -99,26 +99,90 @@ def mark(x, y, h):
     return f'<g transform="translate({x} {y}) scale({k:.4f})">' + "".join(f'<path d="{p}" fill="{AMBER}"/>' for p in MARK) + "</g>"
 
 
+def neq(x, y, s, color):
+    """Signo «distinto de» dibujado (la tipografía en subconjunto latino no lo trae)."""
+    return (f'<path d="M{x} {y - s*0.2}H{x+s}M{x} {y + s*0.2}H{x+s}M{x + s*0.7} {y - s*0.55}L{x + s*0.3} {y + s*0.55}" '
+            f'fill="none" stroke="{color}" stroke-width="2" stroke-linecap="round"/>')
+
+
+def frame(W, H, T):
+    """Marco de línea fina, como en una pieza impresa."""
+    return f'<rect x="24.5" y="24.5" width="{W-49}" height="{H-49}" rx="10" fill="none" stroke="{T["line"]}"/>'
+
+
 def banner(t):
-    """Solo la columna izquierda: lugar, marca, nombre, promesa y áreas de trabajo."""
-    T = THEMES[t]; W, H = 1280, 400
-    b = [f'<rect width="{W}" height="{H}" fill="{T["bg"]}"/>']
-    b.append(f'<rect x="24.5" y="24.5" width="{W-49}" height="{H-49}" rx="28" fill="{T["card"]}" stroke="{T["line"]}"/>')
-    b.append(text("SAN JUAN BAUTISTA  ·  MISIONES  ·  PARAGUAY", 88, 100, 600, 14, T["accent"], 0.12))
-    b.append(mark(90, 128, 70))
-    wm, _ = runs([("Leo ", 400), ("Leguizamón", 700)], 86, 264, 66, T["ink"], -0.025)
+    """Portada editorial centrada: áreas, marca, nombre, filete ámbar, promesa; lugar y usuario en el pie."""
+    T = THEMES[t]; W, H = 1280, 460; cx = W / 2
+    b = [f'<rect width="{W}" height="{H}" fill="{T["bg"]}"/>', frame(W, H, T)]
+    b.append(text("DISEÑO  ·  ESTRATEGIA  ·  WEB  ·  DOCENCIA", cx, 96, 500, 12, T["quiet"], 0.32, "middle"))
+    b.append(mark(cx - 36, 122, 72))
+    size = 84
+    total = width("Leo ", 400, size, -0.03) + width("Leguizamón", 700, size, -0.03)
+    wm, _ = runs([("Leo ", 400), ("Leguizamón", 700)], cx - total / 2, 286, size, T["ink"], -0.03)
     b.append(wm)
-    b.append(text("Diseño marcas con estrategia y las llevo a la web.", 88, 308, 500, 24, T["ink"], -0.01))
-    x = 88
-    for i, item in enumerate(("Diseño gráfico", "Estrategia de marca", "Docencia", "Desarrollo fullstack con IA")):
-        if i:
-            b.append(f'<rect x="{x}" y="331" width="1" height="20" fill="{T["line"]}"/>')
-            x += 18
-        b.append(text(item, x, 346, 400, 16, T["quiet"]))
-        x += width(item, 400, 16) + 18
+    b.append(f'<rect x="{cx-24}" y="316" width="48" height="2" fill="{AMBER}"/>')
+    b.append(text("Diseño marcas con estrategia y las llevo a la web.", cx, 358, 400, 22, T["quiet"], 0, "middle"))
+    b.append(text("SAN JUAN BAUTISTA  ·  MISIONES  ·  PARAGUAY", 56, H - 44, 500, 10.5, T["quiet"], 0.28))
+    b.append(text("@LEOLEGUIZAMONPY", W - 56, H - 44, 500, 10.5, T["quiet"], 0.28, "end"))
     return svg(W, H, "Leo Leguizamón: diseño marcas con estrategia y las llevo a la web", "".join(b))
+
+
+SERVICES = [
+    ("01", "Identidad de marca", ["Estrategia, logotipo,", "sistema visual y manual."]),
+    ("02", "Campañas", ["Concepto y piezas coherentes,", "también institucionales y políticas."]),
+    ("03", "Redes sociales", ["Línea gráfica, contenidos", "y calendario."]),
+    ("04", "Web y herramientas con IA", ["Sitios a medida y herramientas", "propias para trabajar mejor."]),
+]
+
+
+def services(t):
+    """Qué hago: cuatro columnas numeradas, separadas por filetes."""
+    T = THEMES[t]; W, H = 1280, 300
+    b = [f'<rect width="{W}" height="{H}" fill="{T["bg"]}"/>', frame(W, H, T)]
+    b.append(text("QUÉ HAGO", 64, 84, 500, 12, T["quiet"], 0.32))
+    col = (W - 128) / 4
+    for i, (num, title, lines) in enumerate(SERVICES):
+        x = 64 + i * col
+        if i:
+            b.append(f'<rect x="{x - 20}" y="116" width="1" height="132" fill="{T["line"]}"/>')
+        b.append(text(num, x, 136, 600, 13, T["accent"], 0.1))
+        b.append(text(title, x, 176, 700, 21, T["ink"], -0.01))
+        for j, line in enumerate(lines):
+            b.append(text(line, x, 210 + j * 24, 400, 16, T["quiet"]))
+    return svg(W, H, "Qué hago: identidad de marca, campañas, redes sociales y web con herramientas de IA", "".join(b))
+
+
+PRINCIPLES = [
+    ("Mide, no promete", ["Cada entrega dice qué está medido", "y qué es una decisión de diseño."]),
+    ("Por etapas", ["Avances que se pueden ver, con", "pruebas en cada cambio."]),
+    ("Revisado antes de entregar", ["Nada llega al cliente sin pasar", "por una revisión completa."]),
+]
+
+
+def principles(t):
+    """Cómo trabajo: la regla de la casa arriba y tres principios."""
+    T = THEMES[t]; W, H = 1280, 320
+    b = [f'<rect width="{W}" height="{H}" fill="{T["bg"]}"/>', frame(W, H, T)]
+    b.append(text("CÓMO TRABAJO", 64, 84, 500, 12, T["quiet"], 0.32))
+    x = 64
+    for i, (word, w) in enumerate((("Implementado", 400), ("probado", 400), ("validado con casos reales", 700))):
+        if i:
+            b.append(neq(x + 10, 125, 16, T["ink"]))
+            x += 36
+        b.append(text(word, x, 134, w, 26, T["ink"], -0.01))
+        x += width(word, w, 26, -0.01)
+    col = (W - 128) / 3
+    for i, (title, lines) in enumerate(PRINCIPLES):
+        x = 64 + i * col
+        b.append(f'<rect x="{x}" y="176" width="28" height="2" fill="{AMBER}"/>')
+        b.append(text(title, x, 214, 700, 19, T["ink"], -0.01))
+        for j, line in enumerate(lines):
+            b.append(text(line, x, 246 + j * 24, 400, 16, T["quiet"]))
+    return svg(W, H, "Cómo trabajo: mide, no promete; por etapas; revisado antes de entregar", "".join(b))
 
 
 for t in ("light", "dark"):
     open(OUT + f"banner_{t}.svg", "w").write(banner(t))
+    open(OUT + f"servicios_{t}.svg", "w").write(services(t))
+    open(OUT + f"principios_{t}.svg", "w").write(principles(t))
 print("ok")
