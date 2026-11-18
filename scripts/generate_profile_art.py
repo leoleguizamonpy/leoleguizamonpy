@@ -94,9 +94,10 @@ THEMES = {
 }
 
 
-def mark(x, y, h):
+def mark(x, y, h, color):
+    """Logo de Leo: negro sobre fondo claro; en el tema oscuro, invertido para que se vea."""
     k = h / 255.12
-    return f'<g transform="translate({x} {y}) scale({k:.4f})">' + "".join(f'<path d="{p}" fill="{AMBER}"/>' for p in MARK) + "</g>"
+    return f'<g transform="translate({x} {y}) scale({k:.4f})">' + "".join(f'<path d="{p}" fill="{color}"/>' for p in MARK) + "</g>"
 
 
 def neq(x, y, s, color):
@@ -115,7 +116,7 @@ def banner(t):
     T = THEMES[t]; W, H = 1280, 460; cx = W / 2
     b = [f'<rect width="{W}" height="{H}" fill="{T["bg"]}"/>', frame(W, H, T)]
     b.append(text("DISEÑO  ·  ESTRATEGIA  ·  WEB  ·  DOCENCIA", cx, 96, 500, 12, T["quiet"], 0.32, "middle"))
-    b.append(mark(cx - 36, 122, 72))
+    b.append(mark(cx - 36, 122, 72, T["ink"]))
     size = 84
     total = width("Leo ", 400, size, -0.03) + width("Leguizamón", 700, size, -0.03)
     wm, _ = runs([("Leo ", 400), ("Leguizamón", 700)], cx - total / 2, 286, size, T["ink"], -0.03)
